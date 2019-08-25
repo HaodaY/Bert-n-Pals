@@ -30,24 +30,23 @@ parser = argparse.ArgumentParser()
 
 ## Required parameters
 parser.add_argument("--tf_checkpoint_path",
-                    default=None,
-                    type=str,
-                    required=True,
-                    help="Path the TensorFlow checkpoint path.")
+                    default = None,
+                    type = str,
+                    required = True,
+                    help = "Path the TensorFlow checkpoint path.")
 parser.add_argument("--bert_config_file",
-                    default=None,
-                    type=str,
-                    required=True,
-                    help="The config json file corresponding to the pre-trained BERT model. \n"
-                         "This specifies the model architecture.")
+                    default = None,
+                    type = str,
+                    required = True,
+                    help = "The config json file corresponding to the pre-trained BERT model. \n"
+                        "This specifies the model architecture.")
 parser.add_argument("--pytorch_dump_path",
-                    default=None,
-                    type=str,
-                    required=True,
-                    help="Path to the output PyTorch model.")
+                    default = None,
+                    type = str,
+                    required = True,
+                    help = "Path to the output PyTorch model.")
 
 args = parser.parse_args()
-
 
 def convert():
     # Initialise PyTorch model
@@ -102,15 +101,5 @@ def convert():
     # Save pytorch-model
     torch.save(model.state_dict(), args.pytorch_dump_path)
 
-
 if __name__ == "__main__":
     convert()
-
-
-"""
-export BERT_BASE_DIR=/data/users/yuanhaoda/Bert-n-Pals/bert_models/uncased_L-12_H-768_A-12
-python convert_tf_checkpoint_to_pytorch.py \
-  --tf_checkpoint_path=$BERT_BASE_DIR/bert_model.ckpt \
-  --bert_config_file=$BERT_BASE_DIR/bert_config.json \
-  --pytorch_dump_path=$BERT_BASE_DIR/pytorch_model.bin
-"""
