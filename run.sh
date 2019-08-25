@@ -3,8 +3,8 @@
 
 export BERT_BASE_DIR=/data/users/yuanhaoda/Bert-n-Pals/bert_models/uncased_L-12_H-768_A-12
 export BERT_PYTORCH_DIR=/data/users/yuanhaoda/Bert-n-Pals/bert_models/uncased_L-12_H-768_A-12
-export GLUE_DIR=/data/users/yuanhaoda/Bert-n-Pals/bert_models/glue/glue_data
-export SAVE_DIR=/data/users/yuanhaoda/Bert-n-Pals/bert_models/tmp/saved
+export GLUE_DIR=/data/users/yuanhaoda/Bert-n-Pals/glue/glue_data
+export SAVE_DIR=/data/users/yuanhaoda/Bert-n-Pals/tmp/saved
 
 python run_multi_task.py \
   --seed 42 \
