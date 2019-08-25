@@ -37,9 +37,9 @@ import tokenization
 from modeling import BertConfig, BertForSequenceClassification, BertForMultiTask
 from optimization import BERTAdam
 
-logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(name)s -   %(message)s', 
-                    datefmt = '%m/%d/%Y %H:%M:%S',
-                    level = logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
+                    datefmt='%m/%d/%Y %H:%M:%S',
+                    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -164,7 +164,7 @@ class MnliProcessor(DataProcessor):
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
- 
+
 
 class STSProcessor(DataProcessor):
     """Processor for the STS-B data set (GLUE version)."""
@@ -228,7 +228,8 @@ class QQPProcessor(DataProcessor):
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
-       
+
+
 class QNLIProcessor(DataProcessor):
     """Processor for the QNLI data set (GLUE version)."""
 
@@ -259,6 +260,7 @@ class QNLIProcessor(DataProcessor):
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
+
 
 class RTEProcessor(DataProcessor):
     """Processor for the RTE data set (GLUE version)."""
@@ -446,11 +448,11 @@ def convert_examples_to_features(examples, label_list, max_seq_length, tokenizer
             logger.info("label: %s (id = %d)" % (example.label, label_id))'''
 
         features.append(
-                InputFeatures(
-                        input_ids=input_ids,
-                        input_mask=input_mask,
-                        segment_ids=segment_ids,
-                        label_id=label_id))
+            InputFeatures(
+                input_ids=input_ids,
+                input_mask=input_mask,
+                segment_ids=segment_ids,
+                label_id=label_id))
     return features
 
 
@@ -470,14 +472,14 @@ def _truncate_seq_pair(tokens_a, tokens_b, max_length):
         else:
             tokens_b.pop()
 
+
 def accuracy(out, labels):
     outputs = np.argmax(out, axis=1)
-    return np.sum(outputs==labels)
+    return np.sum(outputs == labels)
 
 
-def do_eval(model, logger, args, device, tr_loss, nb_tr_steps, global_step, processor, 
+def do_eval(model, logger, args, device, tr_loss, nb_tr_steps, global_step, processor,
             label_list, tokenizer, eval_dataloader, task_id, i):
-
     model.eval()
     eval_loss, eval_accuracy = 0, 0
     nb_eval_steps, nb_eval_examples = 0, 0
@@ -520,7 +522,7 @@ def do_eval(model, logger, args, device, tr_loss, nb_tr_steps, global_step, proc
     result = {'eval_loss': eval_loss,
               'eval_accuracy': eval_accuracy,
               'global_step': global_step,
-              'loss': tr_loss/nb_tr_steps}
+              'loss': tr_loss / nb_tr_steps}
 
     output_eval_file = os.path.join(args.output_dir, "eval_results.txt")
     with open(output_eval_file, "w") as writer:
@@ -636,14 +638,14 @@ def main():
                         type=int,
                         default=-1,
                         help="local_rank for distributed training on gpus")
-    parser.add_argument('--seed', 
-                        type=int, 
+    parser.add_argument('--seed',
+                        type=int,
                         default=42,
                         help="random seed for initialization")
     parser.add_argument('--gradient_accumulation_steps',
                         type=int,
                         default=1,
-                        help="Number of updates steps to accumualte before performing a backward/update pass.")                       
+                        help="Number of updates steps to accumualte before performing a backward/update pass.")
     args = parser.parse_args()
 
     processors = {
@@ -669,7 +671,7 @@ def main():
 
     if args.gradient_accumulation_steps < 1:
         raise ValueError("Invalid accumulate_gradients parameter: {}, should be >= 1".format(
-                            args.gradient_accumulation_steps))
+            args.gradient_accumulation_steps))
 
     args.train_batch_size = int(args.train_batch_size / args.gradient_accumulation_steps)
 
@@ -687,17 +689,17 @@ def main():
     if args.max_seq_length > bert_config.max_position_embeddings:
         raise ValueError(
             "Cannot use sequence length {} because the BERT model was only trained up to sequence length {}".format(
-            args.max_seq_length, bert_config.max_position_embeddings))
+                args.max_seq_length, bert_config.max_position_embeddings))
 
     if os.path.exists(args.output_dir) and os.listdir(args.output_dir):
         raise ValueError("Output directory ({}) already exists and is not empty.".format(args.output_dir))
     os.makedirs(args.output_dir, exist_ok=True)
 
     if args.tasks == 'inf':
-        task_names =['qnli', 'mnli', 'rte']
+        task_names = ['qnli', 'mnli', 'rte']
         data_dirs = ['QNLI', 'MNLI', 'RTE']
     elif args.tasks == 'all':
-        task_names =['cola', 'mrpc', 'mnli', 'rte', 'sts', 'sst', 'qqp', 'qnli']
+        task_names = ['cola', 'mrpc', 'mnli', 'rte', 'sts', 'sst', 'qqp', 'qnli']
         data_dirs = ['CoLA', 'MRPC', 'MNLI', 'RTE', 'STS-B', 'SST-2', 'QQP', 'QNLI']
     elif args.tasks == 'single':
         task_names = ['cola', 'mrpc', 'mnli', 'rte', 'sts', 'sst', 'qqp', 'qnli']
@@ -717,7 +719,8 @@ def main():
     num_train_steps = None
     num_tasks = len(task_names)
     if args.do_train:
-        train_examples = [processor.get_train_examples(args.data_dir + data_dir) for processor, data_dir in zip(processor_list, data_dirs)]
+        train_examples = [processor.get_train_examples(args.data_dir + data_dir) for processor, data_dir in
+                          zip(processor_list, data_dirs)]
         num_train_steps = int(
             len(train_examples[0]) / args.train_batch_size * args.num_train_epochs)
         if args.tasks == 'all':
@@ -728,7 +731,7 @@ def main():
     if args.tasks == 'all':
         steps_per_epoch = args.gradient_accumulation_steps * 300 * num_tasks
     else:
-        steps_per_epoch = int(num_train_steps/(2. * args.num_train_epochs))
+        steps_per_epoch = int(num_train_steps / (2. * args.num_train_epochs))
     bert_config.num_tasks = num_tasks
     if args.h_aug is not 'n/a':
         bert_config.hidden_size_aug = int(args.h_aug)
@@ -768,9 +771,11 @@ def main():
     if args.optim == 'normal':
         no_decay = ['bias', 'gamma', 'beta']
         optimizer_parameters = [
-                {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.01},
-                {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay_rate': 0.0}
-                ]
+            {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+             'weight_decay_rate': 0.01},
+            {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+             'weight_decay_rate': 0.0}
+        ]
         optimizer = BERTAdam(optimizer_parameters,
                              lr=args.learning_rate,
                              warmup=args.warmup_proportion,
@@ -779,21 +784,27 @@ def main():
         no_decay = ['bias', 'gamma', 'beta']
         base = ['attn']
         optimizer_parameters = [
-                {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and not any(nd in n for nd in base)], 'weight_decay_rate': 0.01},
-                {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and not any(nd in n for nd in base)], 'weight_decay_rate': 0.0}
-                ]
+            {'params': [p for n, p in model.named_parameters() if
+                        not any(nd in n for nd in no_decay) and not any(nd in n for nd in base)],
+             'weight_decay_rate': 0.01},
+            {'params': [p for n, p in model.named_parameters() if
+                        any(nd in n for nd in no_decay) and not any(nd in n for nd in base)], 'weight_decay_rate': 0.0}
+        ]
         optimizer = BERTAdam(optimizer_parameters,
                              lr=args.learning_rate,
                              warmup=args.warmup_proportion,
                              t_total=total_tr)
         optimizer_parameters_mult = [
-                {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and any(nd in n for nd in base)], 'weight_decay_rate': 0.01},
-                {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and any(nd in n for nd in base)], 'weight_decay_rate': 0.0}
-                ]
+            {'params': [p for n, p in model.named_parameters() if
+                        not any(nd in n for nd in no_decay) and any(nd in n for nd in base)],
+             'weight_decay_rate': 0.01},
+            {'params': [p for n, p in model.named_parameters() if
+                        any(nd in n for nd in no_decay) and any(nd in n for nd in base)], 'weight_decay_rate': 0.0}
+        ]
         optimizer_mult = BERTAdam(optimizer_parameters_mult,
-                             lr=3e-4,
-                             warmup=args.warmup_proportion,
-                             t_total=total_tr)
+                                  lr=3e-4,
+                                  warmup=args.warmup_proportion,
+                                  t_total=total_tr)
     if args.do_eval:
         eval_loaders = []
         for i, task in enumerate(task_names):
@@ -807,7 +818,7 @@ def main():
                 all_label_ids = torch.tensor([f.label_id for f in eval_features], dtype=torch.long)
             else:
                 all_label_ids = torch.tensor([f.label_id for f in eval_features], dtype=torch.float32)
-    
+
             eval_data = TensorDataset(all_input_ids, all_input_mask, all_segment_ids, all_label_ids)
 
             if args.local_rank == -1:
@@ -851,18 +862,18 @@ def main():
                 alpha = 1.
             if args.sample == 'sqrt':
                 alpha = 0.5
-            probs = [p**alpha for p in probs]
+            probs = [p ** alpha for p in probs]
             tot = sum(probs)
-            probs = [p/tot for p in probs]
+            probs = [p / tot for p in probs]
         task_id = 0
         epoch = 0
         for _ in trange(int(args.num_train_epochs), desc="Epoch"):
             if args.sample == 'anneal':
                 probs = [6680, 2865, 306798, 1945, 4491, 52616, 284257, 84715]
                 alpha = 1. - 0.8 * epoch / (args.num_train_epochs - 1)
-                probs = [p**alpha for p in probs]
+                probs = [p ** alpha for p in probs]
                 tot = sum(probs)
-                probs = [p/tot for p in probs]
+                probs = [p / tot for p in probs]
 
             tr_loss = [0. for i in range(num_tasks)]
             nb_tr_examples, nb_tr_steps = 0, 0
@@ -877,7 +888,7 @@ def main():
                 input_ids, input_mask, segment_ids, label_ids = batch
                 loss, _ = model(input_ids, segment_ids, input_mask, task_id, task_names[task_id], label_ids)
                 if n_gpu > 1:
-                    loss = loss.mean() # mean() to average on multi-gpu.
+                    loss = loss.mean()  # mean() to average on multi-gpu.
                 if args.gradient_accumulation_steps > 1:
                     loss = loss / args.gradient_accumulation_steps
                 loss.backward()
@@ -886,9 +897,9 @@ def main():
                 nb_tr_steps += 1
                 if step % 1000 < num_tasks:
                     logger.info("Task: {}, Step: {}".format(task_id, step))
-                    logger.info("Loss: {}".format(tr_loss[task_id]/nb_tr_steps))
+                    logger.info("Loss: {}".format(tr_loss[task_id] / nb_tr_steps))
                 if (step + 1) % args.gradient_accumulation_steps == 0:
-                    optimizer.step()    # We have accumulated enought gradients
+                    optimizer.step()  # We have accumulated enought gradients
                     if args.optim != 'normal':
                         optimizer_mult.step()
                     model.zero_grad()
@@ -898,7 +909,7 @@ def main():
             epoch += 1
             ev_acc = 0.
             for i, task in enumerate(task_names):
-                ev_acc += do_eval(model, logger, args, device, tr_loss[i], nb_tr_steps, global_step, processor_list[i], 
+                ev_acc += do_eval(model, logger, args, device, tr_loss[i], nb_tr_steps, global_step, processor_list[i],
                                   label_list[i], tokenizer, eval_loaders[i], task, i)
             logger.info("Total acc: {}".format(ev_acc))
             if ev_acc > best_score:
@@ -909,7 +920,7 @@ def main():
 
         ev_acc = 0.
         for i, task in enumerate(task_names):
-            ev_acc += do_eval(model, logger, args, device, tr_loss[i], nb_tr_steps, global_step, processor_list[i], 
+            ev_acc += do_eval(model, logger, args, device, tr_loss[i], nb_tr_steps, global_step, processor_list[i],
                               label_list[i], tokenizer, eval_loaders[i], task, i)
         logger.info("Total acc: {}".format(ev_acc))
 
